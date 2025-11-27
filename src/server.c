@@ -41,11 +41,20 @@ void str_trim_lf (char* arr, int length) {
 
 /* Print IP address */
 void print_client_addr(struct sockaddr_in addr){
-    printf("%d.%d.%d.%d",
-        addr.sin_addr.s_addr & 0xff,
-        (addr.sin_addr.s_addr & 0xff00) >> 8,
-        (addr.sin_addr.s_addr & 0xff0000) >> 16,
-        (addr.sin_addr.s_addr & 0xff000000) >> 24);
+  printf("%d.%d.%d.%d",
+    addr.sin_addr.s_addr & 0xff,
+    (addr.sin_addr.s_addr & 0xff00) >> 8,
+    (addr.sin_addr.s_addr & 0xff0000) >> 16,
+    (addr.sin_addr.s_addr & 0xff000000) >> 24);
+}
+
+/* Passes IP address into buffer */
+void get_client_ip(struct sockaddr_in addr, char *buffer) {
+  sprintf(buffer, "%d.%d.%d.%d",
+    addr.sin_addr.s_addr & 0xff,
+    (addr.sin_addr.s_addr & 0xff00) >> 8,
+    (addr.sin_addr.s_addr & 0xff0000) >> 16,
+    (addr.sin_addr.s_addr & 0xff000000) >> 24);
 }
 
 /* Add clients to queue */
@@ -79,12 +88,10 @@ void send_message(char *s, int uid){
 	pthread_mutex_lock(&clients_mutex);
 	for(int i=0; i<MAX_CLIENTS; ++i){
 		if(clients[i]){
-			if(clients[i]->uid != uid){
-				if(write(clients[i]->sockfd, s, strlen(s)) < 0){
-					perror("ERROR: write to descriptor failed");
-					break;
-				}
-			}
+			if(write(clients[i]->sockfd, s, strlen(s)) < 0){
+        perror("ERROR: write to descriptor failed");
+        break;
+      }
 		}
 	}
 	pthread_mutex_unlock(&clients_mutex);
@@ -99,14 +106,18 @@ void *handle_client(void *arg){
 	cli_count++;
 	client_t *cli = (client_t *)arg;
 
-	// Name
+	// Signifies if a user joined and displays their name.
 	if(recv(cli->sockfd, name, 32, 0) <= 0 || strlen(name) <  2 || strlen(name) >= 32-1){
 		printf("Didn't enter the name.\n");
 		leave_flag = 1;
 	} else{
+    char ip_buff[16];
+    char internal_buff[BUFFER_SZ];
 		strcpy(cli->name, name);
+    get_client_ip(cli->address, ip_buff);
 		sprintf(buff_out, "%s has joined\n", cli->name);
-		printf("%s", buff_out);
+    sprintf(internal_buff, "%s (%s) has joined\n", cli->name, ip_buff);
+		printf("%s", internal_buff);
 		send_message(buff_out, cli->uid);
 	}
 
@@ -122,7 +133,7 @@ void *handle_client(void *arg){
 			if(strlen(buff_out) > 0){
 				send_message(buff_out, cli->uid);
 				str_trim_lf(buff_out, strlen(buff_out));
-				printf("%s -> %s\n", buff_out, cli->name);
+				printf("%s\n", buff_out);
 			}
 		} else if (receive == 0 || strcmp(buff_out, "exit") == 0){
 			sprintf(buff_out, "%s has left\n", cli->name);

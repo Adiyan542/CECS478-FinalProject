@@ -10,6 +10,8 @@
 #include <pthread.h>
 
 #define LENGTH 2048
+#define CLEAR_LINE_ANSI "\033[1A\033[2K\r"
+#define RULES_TXT "Welcome to the chatroom! Enter `/exit` in order to safely exit the chatroom.\n"
 
 // Global variables
 volatile sig_atomic_t flag = 0;
@@ -37,9 +39,10 @@ void send_msg_handler() {
   while(1) {
   	str_overwrite_stdout();
     fgets(message, LENGTH, stdin);
+    printf("%s", CLEAR_LINE_ANSI);  // clears line
     str_trim_lf(message, LENGTH);
 
-    if (strcmp(message, "exit") == 0) {
+    if (strcmp(message, "/exit") == 0) {
 			break;
     } else {
       sprintf(buffer, "%s: %s\n", name, message);
@@ -115,6 +118,7 @@ int main(int argc, char **argv){
 	send(sockfd, name, 32, 0);
 
 	printf("=== WELCOME TO THE CHATROOM ===\n");
+  printf(RULES_TXT);
 
 	pthread_t send_msg_thread;
   if(pthread_create(&send_msg_thread, NULL, (void *) send_msg_handler, NULL) != 0){
@@ -130,7 +134,7 @@ int main(int argc, char **argv){
 
 	while (1){
 		if(flag){
-			printf("\nBye\n");
+			printf("\nExiting the chatroom...\n");
 			break;
     }
 	}

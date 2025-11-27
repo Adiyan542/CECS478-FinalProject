@@ -12,6 +12,7 @@ RUN apt-get update && \
     tcpdump \
     iputils-ping \
     net-tools \
+    libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory

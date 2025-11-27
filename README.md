@@ -24,8 +24,12 @@ docker compose up -d --build
 2. Compile the `server.c` and `client.c` code.
 
 ```bash
-gcc server.c -o server -pthread # server
-gcc client.c -o client -pthread # client
+gcc server.c -o server -pthread
+gcc client.c -o client -pthread 
+
+# FOR ENCRYPTION
+gcc server.c -o server -pthread -lssl -lcrypto
+gcc client.c -o client -pthread -lssl -lcrypto
 ```
 
 3. Enter the terminal for the server and each of the clients.
@@ -47,4 +51,8 @@ For troubleshooting:
 
 ```bash
 hostname -I # get ip address
+
+# extra installs
+apt update
+apt install libssl-dev
 ```
