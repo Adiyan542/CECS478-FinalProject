@@ -12,3 +12,39 @@ All chat messages are protected using authenticated encryption (AEAD), and the s
 - Reproducible build with `make bootstrap`
 
 ## How to Run
+
+### Setup Instructions
+1. Build the Docker container
+- Run the following commands:
+```bash
+cd src/
+docker compose up -d --build
+```
+
+2. Compile the `server.c` and `client.c` code.
+
+```bash
+gcc server.c -o server -pthread # server
+gcc client.c -o client -pthread # client
+```
+
+3. Enter the terminal for the server and each of the clients.
+```bash
+docker exec -it chat_server bash
+docker exec -it client1 bash
+docker exec -it client2 bash
+docker exec -it client3 bash
+```
+
+4. Run the compiled server/client code on their respective devices.
+```bash
+./server 51262          # run this on the server
+
+./client 172.16.238.10 51262  # run the following on each client
+```
+
+For troubleshooting:
+
+```bash
+hostname -I # get ip address
+```
