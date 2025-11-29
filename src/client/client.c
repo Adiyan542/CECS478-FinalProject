@@ -132,12 +132,11 @@ int main(int argc, char **argv){
 		return EXIT_FAILURE;
 	}
 
-	while (1){
-		if(flag){
-			printf("\nExiting the chatroom...\n");
-			break;
-    }
-	}
+	pthread_join(send_msg_thread, NULL);
+
+  if(flag){
+    printf("\nExiting the chatroom...\n");
+  }
 
 	close(sockfd);
 

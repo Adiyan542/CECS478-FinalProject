@@ -21,30 +21,12 @@ cd src/
 docker compose up -d --build
 ```
 
-2. Compile the `server.c` and `client.c` code.
-
+3. Enter the chat rooms for the server and each of the clients.
 ```bash
-gcc server.c -o server -pthread
-gcc client.c -o client -pthread 
-
-# FOR ENCRYPTION
-gcc server.c -o server -pthread -lssl -lcrypto
-gcc client.c -o client -pthread -lssl -lcrypto
-```
-
-3. Enter the terminal for the server and each of the clients.
-```bash
-docker exec -it chat_server bash
-docker exec -it client1 bash
-docker exec -it client2 bash
-docker exec -it client3 bash
-```
-
-4. Run the compiled server/client code on their respective devices.
-```bash
-./server 51262          # run this on the server
-
-./client 172.16.238.10 51262  # run the following on each client
+docker exec -it chat_server server 51262
+docker exec -it client1 client 172.16.238.10 51262
+docker exec -it client2 client 172.16.238.10 51262
+docker exec -it client3 client 172.16.238.10 51262
 ```
 
 For troubleshooting:

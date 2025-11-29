@@ -2,9 +2,12 @@ version: "3.9"
 
 services:
   chat-server:
-    build: .
+    build: ./server
     container_name: chat_server
-    command: tail -f /dev/null
+    command: >
+      sh -c "gcc /app/server/server.c -o /usr/local/bin/server -pthread -lssl -lcrypto 
+      && echo 'Server Compiled Successfully' 
+      && tail -f /dev/null"
     networks:
       chatnet:
         ipv4_address: 172.16.238.10
@@ -18,9 +21,13 @@ services:
     tty: true
 
   client1:
-    build: .
+    build: ./client
     container_name: client1
-    command: tail -f /dev/null
+    # Compile Client to /usr/local/bin
+    command: >
+      sh -c "gcc /app/client/client.c -o /usr/local/bin/client -pthread -lssl -lcrypto 
+      && echo 'Client 1 Compiled' 
+      && tail -f /dev/null"
     networks:
       chatnet:
         ipv4_address: 172.16.238.11
@@ -34,9 +41,12 @@ services:
     tty: true
 
   client2:
-    build: .
+    build: ./client
     container_name: client2
-    command: tail -f /dev/null
+    command: >
+      sh -c "gcc /app/client/client.c -o /usr/local/bin/client -pthread -lssl -lcrypto 
+      && echo 'Client 2 Compiled' 
+      && tail -f /dev/null"
     networks:
       chatnet:
         ipv4_address: 172.16.238.12
@@ -50,9 +60,12 @@ services:
     tty: true
 
   client3:
-    build: .
+    build: ./client
     container_name: client3
-    command: tail -f /dev/null
+    command: >
+      sh -c "gcc /app/client/client.c -o /usr/local/bin/client -pthread -lssl -lcrypto 
+      && echo 'Client 3 Compiled' 
+      && tail -f /dev/null"
     networks:
       chatnet:
         ipv4_address: 172.16.238.13
