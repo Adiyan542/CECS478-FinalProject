@@ -5,7 +5,7 @@ services:
     build: ./server
     container_name: chat_server
     command: >
-      sh -c "gcc /app/server/server.c -o /usr/local/bin/server -pthread -lssl -lcrypto 
+      sh -c "gcc /app/server/server.c -o /usr/local/bin/server -lsodium -lpthread
       && echo 'Server Compiled Successfully' 
       && tail -f /dev/null"
     networks:
@@ -25,7 +25,7 @@ services:
     container_name: client1
     # Compile Client to /usr/local/bin
     command: >
-      sh -c "gcc /app/client/client.c -o /usr/local/bin/client -pthread -lssl -lcrypto 
+      sh -c "gcc /app/client/client.c -o /usr/local/bin/client -lsodium -lpthread
       && echo 'Client 1 Compiled' 
       && tail -f /dev/null"
     networks:
@@ -44,7 +44,7 @@ services:
     build: ./client
     container_name: client2
     command: >
-      sh -c "gcc /app/client/client.c -o /usr/local/bin/client -pthread -lssl -lcrypto 
+      sh -c "gcc /app/client/client.c -o /usr/local/bin/client -lsodium -lpthread
       && echo 'Client 2 Compiled' 
       && tail -f /dev/null"
     networks:
@@ -63,7 +63,7 @@ services:
     build: ./client
     container_name: client3
     command: >
-      sh -c "gcc /app/client/client.c -o /usr/local/bin/client -pthread -lssl -lcrypto 
+      sh -c "gcc /app/client/client.c -o /usr/local/bin/client -lsodium -lpthread
       && echo 'Client 3 Compiled' 
       && tail -f /dev/null"
     networks:

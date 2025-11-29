@@ -13,6 +13,7 @@ RUN apt-get update && \
     iputils-ping \
     net-tools \
     libssl-dev \
+    libsodium-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
