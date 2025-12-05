@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <sodium.h>
+#include <sys/select.h>
 
 #define MAX_CLIENTS 100
 #define BUFFER_SZ 2048
@@ -18,6 +19,9 @@
 
 static _Atomic unsigned int cli_count = 0;
 static int uid = 10;
+
+// Graceful shutdown flag
+static volatile sig_atomic_t keep_running = 1;
 
 // Server's long-term keypair
 static unsigned char server_public_key[crypto_kx_PUBLICKEYBYTES];
@@ -29,13 +33,19 @@ typedef struct {
 	int sockfd;
 	int uid;
 	char name[32];
-	unsigned long long rx_nonce_counter;  // Nonces for receiving from client
-	unsigned long long tx_nonce_counter;  // Nonces for sending to client
+	unsigned long long rx_nonce_counter;
+	unsigned long long tx_nonce_counter;
 	unsigned char session_key[crypto_aead_chacha20poly1305_IETF_KEYBYTES];
 } client_t;
 
 client_t *clients[MAX_CLIENTS];
 pthread_mutex_t clients_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+/* Signal handler for graceful shutdown */
+void handle_shutdown(int sig) {
+	keep_running = 0;
+	printf("\nShutdown signal received...\n");
+}
 
 /* Load or generate server keypair */
 int load_or_generate_server_keypair() {
@@ -51,7 +61,6 @@ int load_or_generate_server_keypair() {
 		}
 	}
 	
-	// Generate new keypair
 	if (crypto_kx_keypair(server_public_key, server_secret_key) != 0) {
 		fprintf(stderr, "ERROR: Failed to generate keypair\n");
 		return -1;
@@ -76,20 +85,17 @@ int perform_key_exchange(int sockfd, unsigned char *session_key) {
 	unsigned char rx_key[crypto_kx_SESSIONKEYBYTES];
 	unsigned char tx_key[crypto_kx_SESSIONKEYBYTES];
 	
-	// Send server's public key
 	if (send(sockfd, server_public_key, crypto_kx_PUBLICKEYBYTES, 0) != crypto_kx_PUBLICKEYBYTES) {
 		perror("ERROR: Failed to send server public key");
 		return -1;
 	}
 	
-	// Receive client's public key
 	ssize_t received = recv(sockfd, client_public_key, crypto_kx_PUBLICKEYBYTES, MSG_WAITALL);
 	if (received != crypto_kx_PUBLICKEYBYTES) {
 		fprintf(stderr, "ERROR: Failed to receive client public key\n");
 		return -1;
 	}
 	
-	// Compute shared secret (server side)
 	if (crypto_kx_server_session_keys(rx_key, tx_key,
 	                                   server_public_key, server_secret_key,
 	                                   client_public_key) != 0) {
@@ -97,10 +103,7 @@ int perform_key_exchange(int sockfd, unsigned char *session_key) {
 		return -1;
 	}
 	
-	// Use rx_key (what server receives from client) as the session key
-	// We'll derive the actual encryption key from it
 	memcpy(session_key, rx_key, crypto_aead_chacha20poly1305_IETF_KEYBYTES);
-	
 	return 0;
 }
 
@@ -194,7 +197,7 @@ void queue_remove(int uid){
 	pthread_mutex_unlock(&clients_mutex);
 }
 
-/* Send encrypted message to all clients (each with their own session key) */
+/* Send encrypted message to all clients */
 void send_message_encrypted(char *plaintext, int sender_uid){
 	pthread_mutex_lock(&clients_mutex);
 	
@@ -204,7 +207,6 @@ void send_message_encrypted(char *plaintext, int sender_uid){
 		if(clients[i]){
 			unsigned char encrypted[ENCRYPTED_BUFFER_SZ];
 			
-			// Encrypt with recipient's session key and nonce counter
 			int encrypted_len = encrypt_message(
 				(unsigned char*)plaintext, plaintext_len,
 				encrypted + sizeof(unsigned long long),
@@ -217,7 +219,6 @@ void send_message_encrypted(char *plaintext, int sender_uid){
 				continue;
 			}
 			
-			// Prepend nonce counter
 			memcpy(encrypted, &clients[i]->tx_nonce_counter, sizeof(unsigned long long));
 			clients[i]->tx_nonce_counter++;
 			
@@ -242,7 +243,6 @@ void *handle_client(void *arg){
 	cli->rx_nonce_counter = 0;
 	cli->tx_nonce_counter = 0;
 
-	// Perform Diffie-Hellman key exchange
 	printf("Performing key exchange with client...\n");
 	if (perform_key_exchange(cli->sockfd, cli->session_key) != 0) {
 		fprintf(stderr, "ERROR: Key exchange failed\n");
@@ -251,7 +251,6 @@ void *handle_client(void *arg){
 	}
 	printf("Key exchange successful! Session key established.\n");
 
-	// Receive encrypted name
 	ssize_t name_recv = recv(cli->sockfd, encrypted_buff, ENCRYPTED_BUFFER_SZ, 0);
 	if(name_recv <= sizeof(unsigned long long)){
 		printf("ERROR: Invalid name packet\n");
@@ -335,10 +334,7 @@ void *handle_client(void *arg){
 
 cleanup:
 	close(cli->sockfd);
-	
-	// Zero out session key before freeing
 	sodium_memzero(cli->session_key, sizeof(cli->session_key));
-	
 	queue_remove(cli->uid);
 	free(cli);
 	cli_count--;
@@ -353,13 +349,11 @@ int main(int argc, char **argv){
 		return EXIT_FAILURE;
 	}
 
-	// Initialize libsodium
 	if (sodium_init() < 0) {
 		fprintf(stderr, "ERROR: libsodium initialization failed\n");
 		return EXIT_FAILURE;
 	}
 
-	// Load or generate server keypair
 	if (load_or_generate_server_keypair() < 0) {
 		return EXIT_FAILURE;
 	}
@@ -375,6 +369,9 @@ int main(int argc, char **argv){
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	serv_addr.sin_port = htons(port);
 
+	// Set up signal handlers
+	signal(SIGINT, handle_shutdown);
+	signal(SIGTERM, handle_shutdown);
 	signal(SIGPIPE, SIG_IGN);
 
 	if(bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0){
@@ -388,10 +385,47 @@ int main(int argc, char **argv){
 	}
 
 	printf("=== FINAL PROJECT: CHAT SERVER ===\n");
+	printf("Press Ctrl+C to shutdown gracefully\n");
 
-	while(1){
+	while(keep_running){
+		// Use select to check if there's a connection ready, with timeout
+		fd_set readfds;
+		struct timeval tv;
+		
+		FD_ZERO(&readfds);
+		FD_SET(listenfd, &readfds);
+		
+		tv.tv_sec = 1;  // 1 second timeout
+		tv.tv_usec = 0;
+		
+		int activity = select(listenfd + 1, &readfds, NULL, NULL, &tv);
+		
+		if (activity < 0 && errno != EINTR) {
+			perror("ERROR: select failed");
+			break;
+		}
+		
+		// Check if we should exit
+		if (!keep_running) {
+			break;
+		}
+		
+		// If no activity, continue loop (will check keep_running again)
+		if (activity == 0) {
+			continue;
+		}
+		
+		// Accept new connection
 		socklen_t clilen = sizeof(cli_addr);
 		connfd = accept(listenfd, (struct sockaddr*)&cli_addr, &clilen);
+		
+		if (connfd < 0) {
+			if (errno == EINTR) {
+				continue;  // Interrupted by signal, check keep_running
+			}
+			perror("ERROR: accept failed");
+			continue;
+		}
 
 		if((cli_count + 1) == MAX_CLIENTS){
 			printf("Max clients reached. Rejected: ");
@@ -412,8 +446,24 @@ int main(int argc, char **argv){
 		sleep(1);
 	}
 
-	// Zero out server secret key on exit
+	// Graceful shutdown
+	printf("Shutting down server...\n");
+	
+	// Close all client connections
+	pthread_mutex_lock(&clients_mutex);
+	for(int i = 0; i < MAX_CLIENTS; i++){
+		if(clients[i]){
+			close(clients[i]->sockfd);
+			// Note: the threads will clean up their own memory
+		}
+	}
+	pthread_mutex_unlock(&clients_mutex);
+	
+	close(listenfd);
+	
+	// Zero out server secret key
 	sodium_memzero(server_secret_key, sizeof(server_secret_key));
-
+	
+	printf("Server shutdown complete\n");
 	return EXIT_SUCCESS;
 }
