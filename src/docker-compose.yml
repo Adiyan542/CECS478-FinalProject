@@ -1,0 +1,86 @@
+version: "3.9"
+
+services:
+  chat-server:
+    build: ./server
+    container_name: chat_server
+    command: >
+      sh -c "gcc /app/server/server.c -o /usr/local/bin/server -lsodium -lpthread
+      && echo 'Server Compiled Successfully' 
+      && tail -f /dev/null"
+    networks:
+      chatnet:
+        ipv4_address: 172.16.238.10
+    ports:
+      - "51262:51262"
+    volumes:
+      - .:/app
+    cap_add:
+      - NET_ADMIN
+    stdin_open: true
+    tty: true
+
+  client1:
+    build: ./client
+    container_name: client1
+    # Compile Client to /usr/local/bin
+    command: >
+      sh -c "gcc /app/client/client.c -o /usr/local/bin/client -lsodium -lpthread
+      && echo 'Client 1 Compiled' 
+      && tail -f /dev/null"
+    networks:
+      chatnet:
+        ipv4_address: 172.16.238.11
+    depends_on:
+      - chat-server
+    volumes:
+      - .:/app
+    cap_add:
+      - NET_ADMIN
+    stdin_open: true
+    tty: true
+
+  client2:
+    build: ./client
+    container_name: client2
+    command: >
+      sh -c "gcc /app/client/client.c -o /usr/local/bin/client -lsodium -lpthread
+      && echo 'Client 2 Compiled' 
+      && tail -f /dev/null"
+    networks:
+      chatnet:
+        ipv4_address: 172.16.238.12
+    depends_on:
+      - chat-server
+    volumes:
+      - .:/app
+    cap_add:
+      - NET_ADMIN
+    stdin_open: true
+    tty: true
+
+  client3:
+    build: ./client
+    container_name: client3
+    command: >
+      sh -c "gcc /app/client/client.c -o /usr/local/bin/client -lsodium -lpthread
+      && echo 'Client 3 Compiled' 
+      && tail -f /dev/null"
+    networks:
+      chatnet:
+        ipv4_address: 172.16.238.13
+    depends_on:
+      - chat-server
+    volumes:
+      - .:/app
+    cap_add:
+      - NET_ADMIN
+    stdin_open: true
+    tty: true
+
+networks:
+  chatnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.238.0/24
