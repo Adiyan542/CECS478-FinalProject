@@ -6,7 +6,7 @@ import signal
 
 def run_simulation():
     print("Starting Simulation")
-    
+
     # List to keep track of processes to clean up later
     procs = []
 
@@ -14,7 +14,9 @@ def run_simulation():
         # Start the Server (Background)
         print("Starting Chat Server")
         server_cmd = ["docker", "exec", "-i", "chat_server", "server", "51262"]
-        server_proc = subprocess.Popen(server_cmd, stdin=subprocess.PIPE, stdout=None, stderr=None)
+        server_proc = subprocess.Popen(
+            server_cmd, stdin=subprocess.PIPE, stdout=None, stderr=None
+        )
         procs.append(server_proc)
         time.sleep(1)
 
@@ -22,8 +24,12 @@ def run_simulation():
         print("Client 1 connecting...")
         c1_cmd = ["docker", "exec", "-i", "client1", "client", "172.16.238.10", "51262"]
         # IMPORTANT: Redirect client output to /dev/null to hide it
-        c1_proc = subprocess.Popen(c1_cmd, stdin=subprocess.PIPE, 
-                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        c1_proc = subprocess.Popen(
+            c1_cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
         procs.append(c1_proc)
         time.sleep(1)
 
@@ -40,8 +46,12 @@ def run_simulation():
         # Client 2 Joins
         print("Client 2 connecting...")
         c2_cmd = ["docker", "exec", "-i", "client2", "client", "172.16.238.10", "51262"]
-        c2_proc = subprocess.Popen(c2_cmd, stdin=subprocess.PIPE,
-                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        c2_proc = subprocess.Popen(
+            c2_cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
         procs.append(c2_proc)
         time.sleep(1)
 
@@ -55,7 +65,7 @@ def run_simulation():
         c2_proc.stdin.write(b"Hi Bob! Alice here.\n")
         c2_proc.stdin.flush()
         time.sleep(0.5)
-        
+
         c1_proc.stdin.write(b"Nice to meet you, Alice.\n")
         c1_proc.stdin.flush()
         time.sleep(1)
@@ -63,8 +73,12 @@ def run_simulation():
         # Client 3 Joins
         print("Client 3 connecting")
         c3_cmd = ["docker", "exec", "-i", "client3", "client", "172.16.238.10", "51262"]
-        c3_proc = subprocess.Popen(c3_cmd, stdin=subprocess.PIPE,
-                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        c3_proc = subprocess.Popen(
+            c3_cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
         procs.append(c3_proc)
         time.sleep(0.5)
 
@@ -134,6 +148,7 @@ def run_simulation():
             except subprocess.TimeoutExpired:
                 p.kill()
         print("--- Simulation Complete ---")
+
 
 if __name__ == "__main__":
     run_simulation()
