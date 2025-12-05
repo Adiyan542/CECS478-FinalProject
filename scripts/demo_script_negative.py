@@ -50,15 +50,20 @@ def run_simulation():
         c2_proc.stdin.flush()
         time.sleep(1)
 
-        # Interleaved Chatting between Client 1 and 2
-        print("--- Chatting ensues ---")
-        c2_proc.stdin.write(b"Hi Bob! Alice here.\n")
+        # Client 2 attempts to send an empty message
+        print("--- Client 2 sends an empty message... ---")
+        c2_proc.stdin.write(b"\n")
         c2_proc.stdin.flush()
         time.sleep(0.5)
         
-        c1_proc.stdin.write(b"Nice to meet you, Alice.\n")
+        # Client 1 attempts to send very long message
+        print("--- Client 2 sends a very long message... ---")
+        payload = b"A" * 2080 + b"<this text is outside of the permitted length and shouldn't be sent>" 
+        c1_proc.stdin.write(payload)
         c1_proc.stdin.flush()
         time.sleep(1)
+
+        print("--- Continuing as normal... ---")
 
         # Client 3 Joins
         print("Client 3 connecting")
@@ -75,7 +80,7 @@ def run_simulation():
 
         c3_proc.stdin.write(b"Hello, am I late?\n")
         c3_proc.stdin.flush()
-        time.sleep(2)
+        time.sleep(1)
 
         # Chatting between all clients
         c1_proc.stdin.write(b"No, you're fine. We just got here.\n")
@@ -88,7 +93,7 @@ def run_simulation():
 
         c3_proc.stdin.write(b"Okay, nice!\n")
         c3_proc.stdin.flush()
-        time.sleep(2)
+        time.sleep(1)
 
         # Everyone starts to exit
         print("Client 1 begins to exit...")
@@ -110,7 +115,6 @@ def run_simulation():
         print("\n --- Server Logs --- ")
         # Send SIGINT directly to the server process inside the container
         subprocess.run(["docker", "exec", "chat_server", "pkill", "-SIGINT", "server"])
-        print(" --- End of Server Logs --- \n")
         time.sleep(2)
 
         try:

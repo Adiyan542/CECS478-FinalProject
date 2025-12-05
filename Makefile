@@ -13,5 +13,7 @@ up:
 	docker compose -f src/docker-compose.yml up -d --build --force-recreate
 
 demo:
-	@echo "Running the network conversation demo"
-	python3 demo_script.py
+	@echo "Running the network conversation demo (happy-test)"
+	python3 scripts/demo_script.py
+	@echo "Running the network conversation demo (negative-test)"
+	python3 scripts/demo_script_negative.py

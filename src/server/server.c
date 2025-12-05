@@ -13,7 +13,7 @@
 #include <sys/select.h>
 
 #define MAX_CLIENTS 100
-#define BUFFER_SZ 2048
+#define BUFFER_SZ (2048 + 32)
 #define ENCRYPTED_BUFFER_SZ (BUFFER_SZ + crypto_aead_chacha20poly1305_IETF_ABYTES)
 #define SERVER_KEYPAIR_FILE "server_keypair.key"
 

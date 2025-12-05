@@ -111,7 +111,7 @@ int decrypt_message(const unsigned char *ciphertext, size_t ciphertext_len,
 void str_trim_lf (char* arr, int length) {
 	int i;
 	for (i = 0; i < length; i++) {
-		if (arr[i] == '\n') {
+		if (arr[i] == '\n' || i == length - 1) {
 			arr[i] = '\0';
 			break;
 		}
@@ -134,14 +134,25 @@ void send_msg_handler() {
 
 	while(1) {
 		str_overwrite_stdout();
-		fgets(message, LENGTH, stdin);
+		if (fgets(message, LENGTH, stdin) == NULL) {
+			break; // Handle Ctrl+D (EOF) gracefully
+		}
+
+		// CHECK FOR OVERFLOW
+		size_t len = strlen(message);
+		if (len == LENGTH - 1 && message[len - 1] != '\n') {
+				// Flush the standard input buffer
+				int ch;
+				while ((ch = getchar()) != '\n' && ch != EOF);
+		}
+
 		printf("%s", CLEAR_LINE_ANSI);
 		str_trim_lf(message, LENGTH);
 
-		if (strcmp(message, "/exit") == 0) {
+		if (strncmp(message, "/exit", 5) == 0) {
 			break;
 		} else {
-			sprintf(buffer, "%s: %s\n", name, message);
+			snprintf(buffer, sizeof(buffer), "%s: %s\n", name, message);
 			
 			// Encrypt message
 			pthread_mutex_lock(&nonce_mutex);
