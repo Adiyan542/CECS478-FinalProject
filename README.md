@@ -24,7 +24,13 @@ The network model consists of a single server with multiple clients, within the 
 ## How to Run
 Before anything, make sure you have Docker installed and running on your system.
 
-### Setup Instructions
+### Automatic Script
+To quickly run and test out the program, use the `make up && make demo` commands. These will build the docker containers, and then run the script that simulates a conversation in the network.
+```bash
+make up && make demo
+```
+
+### Manual Setup Instructions
 1. Clone the repo, change to its directory, and then build the Docker containers:
 ```bash
 cd src/
