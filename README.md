@@ -1,7 +1,9 @@
 # Secure Terminal Chat Room
 
-This project is a secure, multi-client terminal chat room built in C and deployed using Docker.  
+This project is a secure, multi-client terminal chat room built in C and deployed using Docker. 
 All chat messages are protected using authenticated encryption (AEAD), and the system includes replay protection, message validation, and isolation inside a private Docker network.
+
+Link to the [Demo Video](https://www.youtube.com/watch?v=AOm0q0YRsBA)
 
 ## Features
 - Multi client chat server (broadcast model)
@@ -24,7 +26,13 @@ The network model consists of a single server with multiple clients, within the 
 ## How to Run
 Before anything, make sure you have Docker installed and running on your system.
 
-### Setup Instructions
+### Automatic Script
+To quickly run and test out the program, use the `make up && make demo` commands. These will build the docker containers, and then run the script that simulates a conversation in the network.
+```bash
+make up && make demo
+```
+
+### Manual Setup Instructions
 1. Clone the repo, change to its directory, and then build the Docker containers:
 ```bash
 cd src/

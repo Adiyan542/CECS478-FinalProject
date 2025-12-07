@@ -1,0 +1,8 @@
+Message,Length(Bytes),Notes
+"Hello everyone! I am Bob.",28,Normal short chat message
+"Hi Bob! Alice here.",20,Normal short chat message
+"No, you're fine. We just got here.",34,Normal medium message
+"David: Hello, am I late?",25,Normal message
+"Alice: ",7,Empty-message negative test
+"AAAAAAAA...(long message)",2080,Long-message negative test
+
