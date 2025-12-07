@@ -1,0 +1,9 @@
+[01m[K/app/client/client.c:[m[K In function '[01m[Ksend_msg_handler[m[K':
+[01m[K/app/client/client.c:140:47:[m[K [01;35m[Kwarning: [m[K'[01m[K
+   [m[K' directive output may be truncated writing 1 byte into a region of size between 0 and 2078 [[01;35m[K-Wformat-truncation=[m[K]
+  140 |       snprintf(buffer, sizeof(buffer), "%s: %s[01;35m[K\n[m[K", name, message);
+      |                                               [01;35m[K^~[m[K
+[01m[K/app/client/client.c:140:7:[m[K [01;36m[Knote: [m[K'[01m[Ksnprintf[m[K' output between 4 and 2082 bytes into a destination of size 2080
+  140 |       [01;36m[Ksnprintf(buffer, sizeof(buffer), "%s: %s\n", name, message)[m[K;
+      |       [01;36m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+Client 1 Compiled
