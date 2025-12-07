@@ -51,9 +51,9 @@ This will:
 docker exec -it chat_server server 51262
 
 ### Start each client:
-docker exec -it client1 client 172.16.238.10 51262
-docker exec -it client2 client 172.16.238.10 51262
-docker exec -it client3 client 172.16.238.10 51262
+- docker exec -it client1 client 172.16.238.10 51262
+- docker exec -it client2 client 172.16.238.10 51262
+- docker exec -it client3 client 172.16.238.10 51262
 
 Once connected, type your name and start chatting.
 
