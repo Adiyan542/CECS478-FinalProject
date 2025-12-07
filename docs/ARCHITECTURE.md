@@ -5,8 +5,8 @@ CECS 478 – Alpha/Beta Integrated Release
 This project is a secure chat room that runs in the terminal. It uses Docker to create a private virtual network where a server and several clients can communicate. Every message sent over the network is encrypted, so no one can read it from the outside.
 
 The program uses:
-- **X25519 Diffie–Hellman** for creating shared secret keys  
-- **ChaCha20-Poly1305 AEAD** for encrypting and protecting each message  
+- **X25519 Diffie Hellman** for creating shared secret keys  
+- **ChaCha20 Poly1305 AEAD** for encrypting and protecting each message  
 - **Nonces** (message counters) to stop replay attacks  
 
 The system has:
