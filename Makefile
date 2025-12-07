@@ -1,12 +1,14 @@
 bootstrap:
 	@echo "Building all containers..."
-	@docker-compose build
+	make up && make demo
 
 run:
-	@docker-compose up
+	@echo "Running the demo..."
+	make demo
 
 clean:
-	@docker-compose down --remove-orphans
+	@echo "Cleaning up all containers..."
+	docker-compose -f src/docker-compose.yml down --remove-orphans
 
 up: 
 	@echo "Building and running the docker container..."
