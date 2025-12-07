@@ -58,4 +58,6 @@ docker exec -it chat_server tcpdump -i eth0 port 51262 -A
 The command line arguments follow this structure:
 - `docker exec -it chat_server tcpdump -i eth0 port <port> -A`
 
+#Trigger CI
+
 All traffic seen through the tcpdump should be fully encrypted, and no plaintext should be exposed.
