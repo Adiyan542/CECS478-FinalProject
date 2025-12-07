@@ -1,7 +1,9 @@
 # Secure Terminal Chat Room
 
-This project is a secure, multi-client terminal chat room built in C and deployed using Docker.  
+This project is a secure, multi-client terminal chat room built in C and deployed using Docker. 
 All chat messages are protected using authenticated encryption (AEAD), and the system includes replay protection, message validation, and isolation inside a private Docker network.
+
+Link to the [Demo Video](https://www.youtube.com/watch?v=AOm0q0YRsBA)
 
 ## Features
 - Multi client chat server (broadcast model)
