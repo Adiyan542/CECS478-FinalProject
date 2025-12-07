@@ -1,0 +1,33 @@
+name: CI Build and Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build Docker containers
+      run: docker compose -f src/docker-compose.yml build
+
+    - name: Run basic encryption test
+      run: |
+        echo "Running encryption test inside chat_server container..."
+        docker compose -f src/docker-compose.yml run --rm chat-server bash -c "\
+          echo '#include <sodium.h>\n#include <stdio.h>\nint main(){ \
+          if (sodium_init()<0){return 1;} \
+          unsigned char key[crypto_aead_chacha20poly1305_IETF_KEYBYTES]; \
+          randombytes_buf(key,sizeof key); \
+          printf(\"OK\\n\"); \
+          return 0; }' > /app/tests/test_encrypt.c && \
+          gcc /app/tests/test_encrypt.c -lsodium -o /app/tests/test_encrypt && \
+          /app/tests/test_encrypt \
+        "
