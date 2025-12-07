@@ -21,19 +21,21 @@ All containers live inside the same private Docker network.
 The server is the “center” of the chat. All clients connect to it, and it forwards encrypted messages to everyone.
 
 
-          +---------------------+
-          |     chat_server     |
-          |   (172.16.238.10)   |
-          +----------+----------+
-                     ^
-                     |
-   ---------------------------------------
-   |                  |                  |
-   v                  v                  v
-   +------------+ +------------+ +------------+
-   |  client1   | | client2    | | client3    |
-   | Bob        | | Alice      | | David      |
-   +------------+ +------------+ +------------+
+                    +---------------------+
+                    |     chat_server     |
+                    |   (172.16.238.10)   |
+                    +----------+----------+
+                               ^
+                               |
+         -------------------------------------------------
+         |                        |                       |
+         v                        v                       v
++----------------+      +----------------+      +----------------+
+|    client1     |      |    client2     |      |    client3     |
+|  Bob           |      |  Alice         |      |  David         |
+|  172.16.238.11 |      |  172.16.238.12 |      |  172.16.238.13 |
++----------------+      +----------------+      +----------------+
+
 
 
 How the system works:
@@ -48,12 +50,13 @@ How the system works:
 ## 3. Docker Network Layout
 
 All containers run only inside the private network:
+
 Docker subnet: 172.16.238.0/24
 
-Server → 172.16.238.10
-Client 1 → 172.16.238.11
-Client 2 → 172.16.238.12
-Client 3 → 172.16.238.13
+- Server:   172.16.238.10  
+- Client 1: 172.16.238.11  
+- Client 2: 172.16.238.12  
+- Client 3: 172.16.238.13  
 
 This stops outside computers from accessing the chat.
 
