@@ -103,7 +103,7 @@ If a nonce repeats or is out of order, the message is rejected.
 
 ---
 
-## 6. Security Rules (Invariants)
+## 6. Security Rules 
 - No plaintext is ever sent over the network  
 - Each client has its own session key  
 - Nonces prevent replay attacks  
