@@ -18,7 +18,7 @@ If it prints version information and does not show errors, Docker is ready.
 
 1. Download the repository from GitHub as a ZIP file.
 2. Unzip the folder.
-3. Open a terminal and go into the project folder: **cd ~/Downloads/CECS478-FinalProject-tofu**
+3. Open a terminal and go into the project folder: **cd ~/Downloads/CECS478-FinalProject-main**
 4. Run the full rebuild command: **make up**
 
 This command will:
