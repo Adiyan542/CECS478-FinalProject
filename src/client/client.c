@@ -137,7 +137,7 @@ void send_msg_handler() {
     if (strncmp(message, "/exit", 5) == 0) {
       break;
     } else {
-      snprintf(buffer, sizeof(buffer), "%s: %s\n", name, message);
+      snprintf(buffer, sizeof(buffer) + 2, "%s: %s\n", name, message);
 
       // Encrypt message
       pthread_mutex_lock(&nonce_mutex);
